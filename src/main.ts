@@ -1,10 +1,13 @@
-import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
+import { CryptoInterceptor } from './common/interceptors/crypto.interceptor';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+        bufferLogs: true,
+    });
 
     app.useGlobalPipes(
         new ValidationPipe({
@@ -13,10 +16,9 @@ async function bootstrap() {
             transform: true, // Transforma automáticamente los payloads a instancias de sus DTOs
         }),
     );
+    app.useGlobalInterceptors(app.get(CryptoInterceptor));
 
     await app.listen(process.env.PORT ?? 3000);
 }
 
-bootstrap().catch((error) => {
-    console.error(error);
-});
+bootstrap();
